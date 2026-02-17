@@ -2,6 +2,7 @@ from flask import Flask, g, request, render_template, jsonify
 from datetime import datetime, timedelta
 from month import Month
 import json
+from csv import DictReader
 import random
 
 app = Flask(__name__)
@@ -44,7 +45,16 @@ def start_date():
     return g.start_date
 
 def schedule():
-    return json.loads(request.files.get('schedule').read().decode('UTF-8'))
+    schedule_file = request.files.get('schedule')
+    content_type = schedule_file.content_type
+    content = schedule_file.read().decode('UTF-8')
+    if (content_type == 'application/json'):
+        return json.loads(content)
+    elif (content_type == 'text/csv'):
+        rows = [row for row in DictReader(content.splitlines())]
+        for row in rows:
+            row['duration'] = int(row['duration'])
+        return rows
 
 def start_date_month():
     if 'start_date_month' not in g:
@@ -59,13 +69,6 @@ def start_date_year():
 
 def first_of_start_date_month():
     return start_date().replace(day=1)
-
-
-
-    # number_of_guests = request.args.get('numberOfGuests', type=int)
-    # cabin_names = tuple(request.args.getlist('cabinName'))
-    # data = cached_data(start_date, days, number_of_guests, cabin_names)
-    # return jsonify(data)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
