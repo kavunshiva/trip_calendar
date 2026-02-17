@@ -2,6 +2,7 @@ from flask import Flask, g, request, render_template, jsonify
 from datetime import datetime, timedelta
 from month import Month
 import json
+import random
 
 app = Flask(__name__)
 
@@ -11,22 +12,28 @@ def calendar():
 
 @app.route('/api/calendar-months', methods=['POST'])
 def create_calendar_months():
+    place_colors = []
     months = []
     date = start_date()
     month = Month(start_date().year, start_date().month)
     for time_slot in schedule():
         place = time_slot['place']
+        color = f'#{random.randint(0, 0xFFFFFF):06x}'
         for _ in range(time_slot['duration']):
             if date not in month.dates:
-                months.append(month.weeks_list)
+                months.append({'name': month.name, 'weeks': month.weeks_list})
                 new_year = month.year + (month.month + 1) // 13
                 new_month = month.month % 12 + 1
                 month = Month(new_year, new_month)
 
             month.dates[date]['place'] = place
+            month.dates[date]['color'] = color
+            place_color = { 'place': place, 'color': color }
+            if place_color not in place_colors:
+                place_colors.append(place_color)
             date += timedelta(1)
-    months.append(month.weeks_list)
-    return jsonify(months)
+    months.append({'name': month.name, 'weeks': month.weeks_list})
+    return jsonify({'placeColors': place_colors, 'months': months})
 
 def start_date():
     if 'start_date' not in g:

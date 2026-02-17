@@ -7,11 +7,11 @@ export const debounce = (callback, wait) => {
   }
 };
 
-export const generateCalendarMonth = (dateStr) => {
+export const generateCalendarMonth = ({ name, weeks }) => {
   const monthTable = document.createElement('table');
   const monthAndYearContent = document.createElement('caption');
-  const tableMonthBody = generateMonthTableBody(dateStr);
-  monthAndYearContent.innerText = getMonthAndYear(dateStr);
+  const tableMonthBody = generateMonthTableBody(weeks);
+  monthAndYearContent.innerText = name;
   monthTable.appendChild(monthAndYearContent);
   monthTable.appendChild(generateMonthTableHead());
   monthTable.appendChild(tableMonthBody);
@@ -37,24 +37,18 @@ const generateMonthTableHead = () => {
   return monthTableHead;
 };
 
-const generateMonthTableBody = (dateStr) => {
+const generateMonthTableBody = (weeks) => {
   const monthTableBody = document.createElement('tbody');
-  const firstDay = firstDayOfMonth(dateStr);
-  let week = document.createElement('tr');
-  for (let dayCount = 0; dayCount < firstDay; dayCount++) {
-    week.appendChild(document.createElement('td'));
-  }
-  for (let day = 1; day <= daysInMonth(dateStr); day++) {
-    const dayElement = document.createElement('td');
-    dayElement.innerText = day;
-    week.appendChild(dayElement);
-
-    if (!((day + firstDay) % 7)) {
-      monthTableBody.appendChild(week);
-      week = document.createElement('tr');
-    }
-  };
-  monthTableBody.appendChild(week);
+  weeks.forEach((week) => {
+    const weekElement = document.createElement('tr');
+    week.forEach(({ day, color }) => {
+      const dayElement = document.createElement('td');
+      if (day) dayElement.innerText = day;
+      if (color) dayElement.style.backgroundColor = color;
+      weekElement.appendChild(dayElement);
+    });
+    monthTableBody.appendChild(weekElement);
+  })
   return monthTableBody;
 };
 
@@ -68,11 +62,6 @@ const generateDaysOfWeekRow = () => {
   return daysOfWeekContent;
 };
 
-const getMonthAndYear = (dateStr) => {
-  return new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' })
-    .format(getDateFromStr(dateStr));
-};
-
 const daysOfWeek = (locale = 'en-US', format = 'short') => {
   const baseDate = new Date(1970, 0, 4);
   return Array.from({ length: 7 }, (_, i) => {
@@ -80,14 +69,4 @@ const daysOfWeek = (locale = 'en-US', format = 'short') => {
     day.setDate(baseDate.getDate() + i);
     return day.toLocaleDateString(locale, { weekday: format });
   });
-};
-
-const firstDayOfMonth = (dateStr) => {
-  const date = getDateFromStr(dateStr);
-  return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-};
-
-const daysInMonth = (dateStr) => {
-  const date = getDateFromStr(dateStr);
-  return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
 };
