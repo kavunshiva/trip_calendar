@@ -1,0 +1,64 @@
+from flask import Flask, g, request, render_template, jsonify
+from datetime import datetime, timedelta
+from month import Month
+import json
+
+app = Flask(__name__)
+
+@app.route('/calendar', methods=['GET'])
+def calendar():
+    return render_template('calendar.html')
+
+@app.route('/api/calendar-months', methods=['POST'])
+def create_calendar_months():
+    months = []
+    date = start_date()
+    month = Month(start_date().year, start_date().month)
+    for time_slot in schedule():
+        place = time_slot['place']
+        for _ in range(time_slot['duration']):
+            if date not in month.dates:
+                months.append(month.weeks_list)
+                new_year = month.year + (month.month + 1) // 13
+                new_month = month.month % 12 + 1
+                month = Month(new_year, new_month)
+
+            month.dates[date]['place'] = place
+            date += timedelta(1)
+    months.append(month.weeks_list)
+    return jsonify(months)
+
+def start_date():
+    if 'start_date' not in g:
+        g.start_date = datetime \
+            .strptime(request.form.get('startDate'), '%Y-%m-%d') \
+            .date()
+
+    return g.start_date
+
+def schedule():
+    return json.loads(request.files.get('schedule').read().decode('UTF-8'))
+
+def start_date_month():
+    if 'start_date_month' not in g:
+        g.start_date_month = start_date().strftime('%B')
+
+    return g.start_date_month
+
+def start_date_year():
+    if 'start_date_year' not in g:
+        g.start_date_year = start_date().strftime('%Y')
+    return g.start_date_year
+
+def first_of_start_date_month():
+    return start_date().replace(day=1)
+
+
+
+    # number_of_guests = request.args.get('numberOfGuests', type=int)
+    # cabin_names = tuple(request.args.getlist('cabinName'))
+    # data = cached_data(start_date, days, number_of_guests, cabin_names)
+    # return jsonify(data)
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0')

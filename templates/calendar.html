@@ -1,0 +1,11 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/calendar.css') }}"></style>
+        <script type="module" src="{{ url_for('static', filename='js/calendar.js') }}"></script>
+    </head>
+    <body>
+        <input id="start-date" type="date" />
+        <input id="schedule" type="file" />
+        <div id="calendar-months"></div>
+    </body>
+</html>

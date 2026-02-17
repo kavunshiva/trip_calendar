@@ -1,0 +1,13 @@
+[
+    { "place": "Buenos Aires", "duration": 5 },
+    { "place": "Montevideo", "duration": 5 },
+    { "place": "São Paulo", "duration": 5 },
+    { "place": "Rio de Janeiro", "duration": 5 },
+    { "place": "La Paz", "duration": 5 },
+    { "place": "Cusco", "duration": 5 },
+    { "place": "Cordillera Huayhuash", "duration": 10 },
+    { "place": "Lima", "duration": 5 },
+    { "place": "Medellin", "duration": 5 },
+    { "place": "Cartagena", "duration": 5 },
+    { "place": "Bogota", "duration": 5 }
+]
